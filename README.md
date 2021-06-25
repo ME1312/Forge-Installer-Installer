@@ -14,7 +14,7 @@ Listen up, cause this process isn't perfect. We are working with potentially bro
 ```
 java -jar forge-installer-installer.jar forge-<numbers>-installer.jar
 ```
-The first step is to run Minecraft Forge Installer Installer. It takes the file location of the actual installer as its only argument.
+The first step is to run Minecraft Forge Installer Installer. It takes the path to the real installer as its only argument.
 
 The Installer Installer does a few things, but the most important one is that it determines what the actual URLs of these resources are by simply following the redirects and printing them to the screen.
 
@@ -32,7 +32,7 @@ Assuming you didn't encounter any bad codes in the last step, this should downlo
 ```
 java -jar forge-<numbers>-installer.jar --offline
 ```
-If the Installer spat an error message and kicked you out despite successfully downloading everything, then this is your next step.
+If the Installer spat an error message in your face and kicked you out despite successfully downloading everything, then this is your next step.
 
 By running the Installer a 2nd time in offline mode, we can build the jar without spamming the servers for checksums.
 
