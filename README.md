@@ -5,9 +5,10 @@ The Minecraft Forge Installers have a problem &mdash; and that is the simple fac
 The only problem with that, is that the installers don't follow 300-series redirects. And so, the need for an Installer for the Installer arised. Minecraft Forge Installer Installer attempts to repair potentially broken Minecraft Forge Installers.
 
 ### Downloads
-> [https://dev.me1312.net/jenkins/job/Forge Installer Installer](https://dev.me1312.net/jenkins/job/Forge%20Installer%20Installer)
+> [https://dev.me1312.net/jenkins/job/Forge Installer Installer](https://dev.me1312.net/jenkins/job/Forge%20Installer%20Installer)<br>
+> [https://files.minecraftforge.net/](https://files.minecraftforge.net)
 
-## Usage
+## Installation Instructions
 Listen up, cause this process isn't perfect. We are working with potentially broken installers here.
 
 ### Step 1
