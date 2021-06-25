@@ -39,4 +39,4 @@ By running the Installer a 2nd time in offline mode, we can build the jar withou
 ### You're done!
 I guess that wasn't too painful. You should now have a full Forge installation, despite your dodgy installer file.
 
-<br><br>
+<br>
