@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,6 +19,9 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class Installer {
+    private static final HashMap<String, ResolvedURL> resolved = new HashMap<String, ResolvedURL>();
+    private static final HashMap<String, String> checksums = new HashMap<String, String>();
+
     public static void main(String[] args) {
         if (args.length != 1) {
             System.out.println("Args: <installer>");
@@ -117,12 +121,17 @@ public class Installer {
 
             if (library != null) {
                 if (keys.contains("sha1") && ((JSONObject) obj).get("sha1") instanceof String) {
-                    try (InputStream sha1 = (library.isOK())? download(library.url + ".sha1") : null) {
+                    final String url = library.url + ".sha1";
+                    try (InputStream sha1 = (library.isOK())? download(url) : null) {
                         if (sha1 != null) {
-                            ((JSONObject) obj).put("sha1", readAll(new InputStreamReader(sha1)));
-                        } else {
-                            ((JSONObject) obj).remove("sha1");
+                            checksums.put(url, readAll(new InputStreamReader(sha1)));
                         }
+                    }
+
+                    if (checksums.containsKey(url)) {
+                        ((JSONObject) obj).put("sha1", checksums.get(url));
+                    } else {
+                        ((JSONObject) obj).remove("sha1");
                     }
                 }
                 if (keys.contains("size") && ((JSONObject) obj).get("size") instanceof Number) {
@@ -150,35 +159,39 @@ public class Installer {
     }
 
     private static ResolvedURL resolve(String url) throws IOException {
-        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-        conn.setRequestMethod("HEAD");
-        conn.setInstanceFollowRedirects(false);
-        conn.setReadTimeout(Integer.getInteger("mcfii.timeout", 30000));
+        if (resolved.containsKey(url)) {
+            HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+            conn.setRequestMethod("HEAD");
+            conn.setInstanceFollowRedirects(false);
+            conn.setReadTimeout(Integer.getInteger("mcfii.timeout", 30000));
 
-        final int status = conn.getResponseCode();
-        final long size = conn.getContentLengthLong();
-        System.out.println("[" + status + "] " + url);
+            final int status = conn.getResponseCode();
+            final long size = conn.getContentLengthLong();
+            System.out.println("[" + status + "] " + url);
 
-        String redirect = null;
-        switch (status) {
-            case 301: // Moved Permanently
-            case 302: // Found
-            case 303: // See Other
-            case 307: // Temporary Redirect
-            case 308: // Permanent Redirect
-                redirect = conn.getHeaderField("Location");
-        }
-
-        conn.disconnect();
-        if (redirect != null) {
-            if (redirect.startsWith("/")) {
-                int index = url.indexOf('/', 8);
-                redirect = url.substring(0, (index == -1)? url.length() : index) + redirect;
+            String redirect = null;
+            switch (status) {
+                case 301: // Moved Permanently
+                case 302: // Found
+                case 303: // See Other
+                case 307: // Temporary Redirect
+                case 308: // Permanent Redirect
+                    redirect = conn.getHeaderField("Location");
             }
-            return resolve(redirect);
-        } else {
-            return new ResolvedURL(url, status, size);
+
+            conn.disconnect();
+            if (redirect != null) {
+                if (redirect.startsWith("/")) {
+                    int index = url.indexOf('/', 8);
+                    redirect = url.substring(0, (index == -1)? url.length() : index) + redirect;
+                }
+                resolved.put(url, resolve(redirect));
+            } else {
+                resolved.put(url, new ResolvedURL(url, status, size));
+            }
         }
+
+        return resolved.get(url);
     }
 
     private static InputStream download(String url) throws IOException {
