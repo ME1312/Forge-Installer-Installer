@@ -14,7 +14,7 @@ java -jar forge-installer-installer.jar forge-<numbers>-installer.jar
 ```
 The first step is to run Minecraft Forge Installer Installer. It takes the path to the real installer as its only argument.
 
-The Installer Installer does a few things, but the most important one is that it determines what the actual URLs of these resources are by simply following the redirects and printing them to the screen.
+The Installer Installer does a few things, but the most important one is that it determines what the actual URLs of these resources are by simply following the redirects and printing them to the screen. If you see more than a couple status codes that aren't in the 200-series or 300-series, then you're probably SOL.
 
-If you see more than a couple status codes that aren't in the 200-series or 300-series, then you're probably SOL, but you can try the next steps anyway. After it's done, you can then run your freshly updated Minecraft Forge Installer.
+After it's done, you can then run your freshly updated copy of Minecraft Forge Installer.
 <br>
