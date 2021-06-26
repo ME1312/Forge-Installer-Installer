@@ -122,9 +122,11 @@ public class Installer {
             if (library != null) {
                 if (keys.contains("sha1") && ((JSONObject) obj).get("sha1") instanceof String) {
                     final String url = library.url + ".sha1";
-                    try (InputStream sha1 = (library.isOK())? download(url) : null) {
-                        if (sha1 != null) {
-                            checksums.put(url, readAll(new InputStreamReader(sha1)));
+                    if (!checksums.containsKey(url)) {
+                        try (InputStream sha1 = (library.isOK())? download(url) : null) {
+                            if (sha1 != null) {
+                                checksums.put(url, readAll(new InputStreamReader(sha1)));
+                            }
                         }
                     }
 
@@ -159,7 +161,7 @@ public class Installer {
     }
 
     private static ResolvedURL resolve(String url) throws IOException {
-        if (resolved.containsKey(url)) {
+        if (!resolved.containsKey(url)) {
             HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
             conn.setRequestMethod("HEAD");
             conn.setInstanceFollowRedirects(false);
