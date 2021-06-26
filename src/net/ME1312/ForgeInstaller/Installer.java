@@ -68,7 +68,7 @@ public class Installer {
                     zop.putNextEntry(new ZipEntry(path));
                     zop.write(json.toString(4).getBytes(StandardCharsets.UTF_8));
                 } else {
-                    zop.putNextEntry(entry);
+                    zop.putNextEntry(new ZipEntry(path));
                     byte[] b = new byte[4096];
                     for (int i; (i = zip.read(b)) != -1; ) {
                         zop.write(b, 0, i);
@@ -107,25 +107,13 @@ public class Installer {
 
                     System.out.println();
                     String resolved = resolve(unresolved);
-                    ((JSONObject) obj).put("url", resolved.substring(0, resolved.length() - path.length()));
+                    ((JSONObject) obj).put(key, resolved.substring(0, resolved.length() - path.length()));
                 } else {
-                    if (key.equals("url") && keys.contains("path") && value instanceof String && ((JSONObject) obj).get("path") instanceof String && isURL((String) value)) {
-                        isLibrary = true;
-                    }
                     ((JSONObject) obj).put(key, convert(value));
                 }
             }
-
-            if (isLibrary) {
-                if (keys.contains("checksums") && ((JSONObject) obj).get("checksums") instanceof JSONArray) {
-                    ((JSONObject) obj).remove("checksums");
-                }
-                if (keys.contains("sha1") && ((JSONObject) obj).get("sha1") instanceof String) {
-                    ((JSONObject) obj).remove("sha1");
-                }
-                if (keys.contains("size") && ((JSONObject) obj).get("size") instanceof Number) {
-                    ((JSONObject) obj).remove("size");
-                }
+            if (isLibrary && keys.contains("checksums") && ((JSONObject) obj).get("checksums") instanceof JSONArray) {
+                ((JSONObject) obj).remove("checksums"); // Checksums can sometimes be wrong pre-1.13
             }
         } else if (obj instanceof JSONArray) {
             for (int i = 0; i < ((JSONArray) obj).length(); ++i) {
@@ -167,8 +155,8 @@ public class Installer {
         }
     }
 
-    private static String deMaven(String descriptor) {
-        String[] parts = descriptor.split(":");
+    private static String deMaven(String s) {
+        String[] parts = s.split(":");
         String domain = parts[0];
         String name = parts[1];
         String ext;

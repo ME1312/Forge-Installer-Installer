@@ -6,10 +6,10 @@ The only problem with that, is that the installers don't follow 300-series redir
 
 ### Downloads
 > [https://dev.me1312.net/jenkins/job/Forge Installer Installer](https://dev.me1312.net/jenkins/job/Forge%20Installer%20Installer)<br>
-> [https://files.minecraftforge.net/](https://files.minecraftforge.net)
+> [https://files.minecraftforge.net](https://files.minecraftforge.net)
 
 ## Installation Instructions
-Listen up, cause this process isn't perfect. We are working with potentially broken installers here.
+Listen up, because this process isn't perfect. We are working with potentially broken installers here.
 
 ### Step 1
 ```
@@ -27,15 +27,7 @@ java -jar forge-<numbers>-installer.jar
 ```
 The next step is to run the actual Minecraft Forge Installer.
 
-Assuming you didn't encounter any bad codes in the last step, this should download everything we need. You may even have a full installation by the end of this step!
-
-### Step 3
-```
-java -jar forge-<numbers>-installer.jar --offline
-```
-If the Installer spat an error message in your face and kicked you out despite successfully downloading everything, then this is your next step.
-
-By running the Installer a 2nd time in offline mode, we can build the jar without spamming the servers for checksums.
+Assuming you didn't encounter any bad codes in the last step, this should download everything we need.
 
 ### You're done!
 I guess that wasn't too painful. You should now have a full Forge installation, despite your dodgy installer file.
