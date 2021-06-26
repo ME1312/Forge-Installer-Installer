@@ -9,9 +9,6 @@ The only problem with that, is that the installers don't follow 300-series redir
 > [https://files.minecraftforge.net](https://files.minecraftforge.net)
 
 ## Installation Instructions
-Listen up, because this process isn't perfect. We are working with potentially broken installers here.
-
-### Step 1
 ```
 java -jar forge-installer-installer.jar forge-<numbers>-installer.jar
 ```
@@ -19,16 +16,5 @@ The first step is to run Minecraft Forge Installer Installer. It takes the path 
 
 The Installer Installer does a few things, but the most important one is that it determines what the actual URLs of these resources are by simply following the redirects and printing them to the screen.
 
-If you see more than a couple status codes that aren't in the 200-series or 300-series, then you're probably SOL, but you can try the next steps anyway.
-
-### Step 2
-```
-java -jar forge-<numbers>-installer.jar
-```
-The next step is to run the actual Minecraft Forge Installer.
-
-Assuming you didn't encounter any bad codes in the last step, this should download everything we need.
-
-### You're done!
-I guess that wasn't too painful. You should now have a full Forge installation, despite your dodgy installer file.
+If you see more than a couple status codes that aren't in the 200-series or 300-series, then you're probably SOL, but you can try the next steps anyway. After it's done, you can then run the freshly updated version of your Minecraft Forge Installer.
 <br>
