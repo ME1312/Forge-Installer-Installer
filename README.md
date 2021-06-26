@@ -16,5 +16,5 @@ The first step is to run Minecraft Forge Installer Installer. It takes the path 
 
 The Installer Installer does a few things, but the most important one is that it determines what the actual URLs of these resources are by simply following the redirects and printing them to the screen.
 
-If you see more than a couple status codes that aren't in the 200-series or 300-series, then you're probably SOL, but you can try the next steps anyway. After it's done, you can then run the freshly updated version of your Minecraft Forge Installer.
+If you see more than a couple status codes that aren't in the 200-series or 300-series, then you're probably SOL, but you can try the next steps anyway. After it's done, you can then run your freshly updated Minecraft Forge Installer.
 <br>
