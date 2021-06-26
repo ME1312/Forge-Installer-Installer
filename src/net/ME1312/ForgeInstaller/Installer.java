@@ -93,7 +93,7 @@ public class Installer {
     private static Object convert(Object obj) throws IOException {
         if (obj instanceof JSONObject) {
             Set<String> keys = ((JSONObject) obj).keySet();
-            boolean isLibrary = false;
+            ResolvedURL library = null;
             for (String key : keys) {
                 Object name;
                 Object value = ((JSONObject) obj).get(key);
@@ -103,17 +103,39 @@ public class Installer {
 
                     String path = deMaven((String) name);
                     unresolved += path;
-                    isLibrary = true;
 
                     System.out.println();
-                    String resolved = resolve(unresolved);
-                    ((JSONObject) obj).put(key, resolved.substring(0, resolved.length() - path.length()));
+                    library = resolve(unresolved);
+                    ((JSONObject) obj).put(key, library.url.substring(0, library.url.length() - path.length()));
+                } else if (key.equals("url") && keys.contains("path") && value instanceof String && ((JSONObject) obj).get("path") instanceof String && isURL((String) value)) {
+                    System.out.println();
+                    library = resolve((String) value);
+                    ((JSONObject) obj).put(key, library.url);
                 } else {
                     ((JSONObject) obj).put(key, convert(value));
                 }
             }
-            if (isLibrary && keys.contains("checksums") && ((JSONObject) obj).get("checksums") instanceof JSONArray) {
-                ((JSONObject) obj).remove("checksums"); // Checksums can sometimes be wrong pre-1.13
+
+            if (library != null) {
+                if (keys.contains("sha1") && ((JSONObject) obj).get("sha1") instanceof String) {
+                    try (InputStream sha1 = download(library.url + ".sha1")) {
+                        if (sha1 != null) {
+                            ((JSONObject) obj).put("sha1", readAll(new InputStreamReader(sha1)));
+                        } else {
+                            ((JSONObject) obj).remove("sha1");
+                        }
+                    }
+                }
+                if (keys.contains("size") && ((JSONObject) obj).get("size") instanceof Number) {
+                    if (library.size != -1) {
+                        ((JSONObject) obj).put("size", library.size);
+                    } else {
+                        ((JSONObject) obj).remove("size");
+                    }
+                }
+                if (keys.contains("checksums") && ((JSONObject) obj).get("checksums") instanceof JSONArray) {
+                    ((JSONObject) obj).remove("checksums");
+                }
             }
         } else if (obj instanceof JSONArray) {
             for (int i = 0; i < ((JSONArray) obj).length(); ++i) {
@@ -122,19 +144,20 @@ public class Installer {
         } else if (obj instanceof String) {
             if (isURL((String) obj)) {
                 System.out.println();
-                return resolve((String) obj);
+                return resolve((String) obj).url;
             }
         }
         return obj;
     }
 
-    private static String resolve(String url) throws IOException {
+    private static ResolvedURL resolve(String url) throws IOException {
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
         conn.setRequestMethod("HEAD");
         conn.setInstanceFollowRedirects(false);
-        conn.setReadTimeout(30000);
+        conn.setReadTimeout(Integer.getInteger("mcfii.timeout", 30000));
 
         int status = conn.getResponseCode();
+        long size = conn.getContentLengthLong();
         System.out.println("[" + status + "] " + url);
 
         String redirect = null;
@@ -149,9 +172,47 @@ public class Installer {
 
         conn.disconnect();
         if (redirect != null) {
+            if (redirect.startsWith("/")) {
+                int index = url.indexOf('/', 8);
+                redirect = url.substring(0, (index == -1)? url.length() : index) + redirect;
+            }
             return resolve(redirect);
         } else {
-            return url;
+            return new ResolvedURL(url, status, size);
+        }
+    }
+
+    private static InputStream download(String url) throws IOException {
+        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+        conn.setRequestMethod("GET");
+        conn.setInstanceFollowRedirects(true);
+        conn.setReadTimeout(Integer.getInteger("mcfii.timeout", 30000));
+
+        switch (conn.getResponseCode()) {
+            case 200: // OK
+            case 203: // Non-Authoritative Information
+                System.out.println("[GET] " + url);
+                InputStream stream = conn.getInputStream();
+                return new InputStream() {
+                    @Override
+                    public int read() throws IOException {
+                        return stream.read();
+                    }
+
+                    @Override
+                    public int read(byte[] b, int off, int len) throws IOException {
+                        return stream.read(b, off, len);
+                    }
+
+                    @Override
+                    public void close() throws IOException {
+                        stream.close();
+                        conn.disconnect();
+                    }
+                };
+            default: {
+                return null;
+            }
         }
     }
 
@@ -161,12 +222,12 @@ public class Installer {
         String name = parts[1];
         String ext;
         int last = parts.length - 1;
-        int idx = parts[last].indexOf('@');
-        if (idx == -1) {
+        int index = parts[last].indexOf('@');
+        if (index == -1) {
             ext = "jar";
         } else {
-            ext = parts[last].substring(idx + 1);
-            parts[last] = parts[last].substring(0, idx);
+            ext = parts[last].substring(index + 1);
+            parts[last] = parts[last].substring(0, index);
         }
         String version = parts[2];
         String classifier = (parts.length > 3)? parts[3] : null;
