@@ -10,4 +10,8 @@ public class ResolvedURL {
         this.status = status;
         this.size = size;
     }
+
+    public boolean isOK() {
+        return status == 200 || status == 203;
+    }
 }

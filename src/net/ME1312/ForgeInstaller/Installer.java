@@ -11,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.StandardCopyOption;
 import java.util.Set;
-import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -118,7 +117,7 @@ public class Installer {
 
             if (library != null) {
                 if (keys.contains("sha1") && ((JSONObject) obj).get("sha1") instanceof String) {
-                    try (InputStream sha1 = download(library.url + ".sha1")) {
+                    try (InputStream sha1 = (library.isOK())? download(library.url + ".sha1") : null) {
                         if (sha1 != null) {
                             ((JSONObject) obj).put("sha1", readAll(new InputStreamReader(sha1)));
                         } else {
@@ -156,8 +155,8 @@ public class Installer {
         conn.setInstanceFollowRedirects(false);
         conn.setReadTimeout(Integer.getInteger("mcfii.timeout", 30000));
 
-        int status = conn.getResponseCode();
-        long size = conn.getContentLengthLong();
+        final int status = conn.getResponseCode();
+        final long size = conn.getContentLengthLong();
         System.out.println("[" + status + "] " + url);
 
         String redirect = null;
@@ -188,31 +187,29 @@ public class Installer {
         conn.setInstanceFollowRedirects(true);
         conn.setReadTimeout(Integer.getInteger("mcfii.timeout", 30000));
 
-        switch (conn.getResponseCode()) {
-            case 200: // OK
-            case 203: // Non-Authoritative Information
-                System.out.println("[GET] " + url);
-                InputStream stream = conn.getInputStream();
-                return new InputStream() {
-                    @Override
-                    public int read() throws IOException {
-                        return stream.read();
-                    }
+        final int status = conn.getResponseCode();
+        if (status == 200 || status == 203) {
+            System.out.println("[GET] " + url);
+            InputStream stream = conn.getInputStream();
+            return new InputStream() {
+                @Override
+                public int read() throws IOException {
+                    return stream.read();
+                }
 
-                    @Override
-                    public int read(byte[] b, int off, int len) throws IOException {
-                        return stream.read(b, off, len);
-                    }
+                @Override
+                public int read(byte[] b, int off, int len) throws IOException {
+                    return stream.read(b, off, len);
+                }
 
-                    @Override
-                    public void close() throws IOException {
-                        stream.close();
-                        conn.disconnect();
-                    }
-                };
-            default: {
-                return null;
-            }
+                @Override
+                public void close() throws IOException {
+                    stream.close();
+                    conn.disconnect();
+                }
+            };
+        } else {
+            return null;
         }
     }
 
