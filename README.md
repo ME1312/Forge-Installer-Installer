@@ -1,6 +1,6 @@
 # Minecraft Forge Installer Installer
 [![Build Status](https://dev.me1312.net/jenkins/job/Forge%20Installer%20Installer/badge/icon)](https://dev.me1312.net/jenkins/job/Forge%20Installer%20Installer/) <br><br>
-The Minecraft Forge Installers have a problem &mdash; and that is the simple fact that cloud resources can change over time. But that's okay, because that's what HTTP 300-series redirects are for.<br><br>
+The Minecraft Forge Installers have a problem &mdash; and that is the simple fact that cloud resources can change over time. But that's okay, because that's what HTTP 300-series redirects are for.<br>
 
 The only problem with that, is that the installers don't follow 300-series redirects. And so, the need for an Installer for the Installer arised. Minecraft Forge Installer Installer attempts to repair potentially broken Minecraft Forge Installers.
 
