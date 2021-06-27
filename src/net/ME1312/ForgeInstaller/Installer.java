@@ -44,17 +44,17 @@ public class Installer {
                     System.out.println("Cleaning MANIFEST.MF ...");
                     System.out.println();
                     StringBuilder edited = new StringBuilder();
-                    String[] original = readAll(new InputStreamReader(zip)).replace("\r", "").replace("\n ", "").split("\n");
-                    Pattern pattern = Pattern.compile("^(Manifest-Version|Main-Class):\\s*(.*)$");
+                    String[] original = readAll(new InputStreamReader(zip)).replace("\r\n", "\n").replace("\n ", "").split("\n");
+                    Pattern pattern = Pattern.compile("^(?:Manifest-Version|Main-Class):.*$");
                     for (String property : original) {
                         Matcher m = pattern.matcher(property);
                         if (m.find()) {
-                            edited.append(m.group(1));
-                            edited.append(": ");
-                            edited.append(m.group(2));
+                            edited.append(m.group());
                             edited.append('\n');
                         }
                     }
+                    edited.append("Built-By: Minecraft Forge Installer Installer");
+                    edited.append('\n');
                     zop.putNextEntry(new ZipEntry(path));
                     zop.write(edited.toString().getBytes(StandardCharsets.UTF_8));
                 } else if (path.startsWith("META-INF/") && path.endsWith(".SF")) {
@@ -62,10 +62,9 @@ public class Installer {
                     System.out.println();
                 } else if (path.indexOf('/') == -1 && path.endsWith(".json")) {
                     System.out.println("Updating " + path + " ...");
-                    JSONObject json = (JSONObject) convert(new JSONObject(readAll(new InputStreamReader(zip))));
                     System.out.println();
                     zop.putNextEntry(new ZipEntry(path));
-                    zop.write(json.toString(4).getBytes(StandardCharsets.UTF_8));
+                    zop.write(((JSONObject) convert(new JSONObject(readAll(new InputStreamReader(zip))))).toString(4).getBytes(StandardCharsets.UTF_8));
                 } else {
                     zop.putNextEntry(new ZipEntry(path));
                     byte[] b = new byte[4096];
